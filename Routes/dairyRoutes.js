@@ -1,9 +1,9 @@
-import express from "express";
+import { Router } from "express";
 import { createDiary, deleteDiary, updateDiary } from "../Controllers/DiaryController.js";
-const router = express.Router();
+const router = Router();
 
 router.post('/create-new-diary', createDiary);
 router.put('/update-diary', updateDiary);
-router.delete('/delete-diary', deleteDiary); 
+router.delete('/delete-diary', deleteDiary);
 
 export default router;

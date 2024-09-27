@@ -24,19 +24,23 @@ export async function createDiary(req, res) {
             name,
             visibility: visibility,
         }
+        const ifTheDiaryAlreadyExists = await Diary.findOne({ name: name });
 
+        if(ifTheDiaryAlreadyExists){
+            return response(res, "Name already exists ", false);
+        }
         const newDiary = new Diary(data);
-        newDiary.save();
+        await newDiary.save();
 
         if (giveAccessTo) {
             const doesGiveAccessToUserExists = giveAccessTo.filter(userId => userIdChecker(userId));
-            Diary.findByIdAndUpdate(
+            await Diary.findByIdAndUpdate(
                 Diary._id,
                 { $push: { giveAccessTo: { $each: doesGiveAccessToUserExists } } }
             );
         }
 
-        return response(res, "New Diary Added", true, Diary._id);
+        return response(res, "New Diary Added", true, newDiary._id);
 
     } catch (error) {
         return response(res, "Api Error for creating new Diary", false);
@@ -59,7 +63,7 @@ export async function updateDiary(req, res) {
         const { name, pages, giveAccessTo, visibility, diaryId } = req.body;
         if (diaryId) {
             if (name) {
-                Diary.findByIdAndUpdate(
+                await Diary.findByIdAndUpdate(
                     Diary._id,
                     {
                         name: name
@@ -67,7 +71,7 @@ export async function updateDiary(req, res) {
                 )
             }
             if (visibility) {
-                Diary.findByIdAndUpdate(
+                await Diary.findByIdAndUpdate(
                     Diary._id,
                     {
                         visibility: visibility
@@ -76,20 +80,21 @@ export async function updateDiary(req, res) {
             }
             if (pages) {
                 const doesPagesExists = pages.filter(page => pageIdChecker(page));
-                Diary.findByIdAndUpdate(
+                await Diary.findByIdAndUpdate(
                     Diary._id,
                     { push: { pages: { $each: doesPagesExists } } }
                 )
             }
+
             if (giveAccessTo) {
                 const doesGiveAccessToUserExists = giveAccessTo.filter(userId => userIdChecker(userId));
-                Diary.findByIdAndUpdate(
+                await Diary.findByIdAndUpdate(
                     Diary._id,
                     { $push: { giveAccessTo: { $each: doesGiveAccessToUserExists } } }
                 );
             }
 
-            Diary.save();
+            await Diary.save();
 
             return response(res, "Diary Updated", true);
 
@@ -103,13 +108,13 @@ export async function updateDiary(req, res) {
 
 // Function for deleting diary
 
-export function deleteDiary(req, res){
+export async function deleteDiary(req, res){
     try {
         const {diaryId} = req.body;
         if(!diaryId){
             return response(res, "Unable to find the diary", false);
         }else{
-            Diary.findByIdAndDelete(diaryId);
+            await Diary.findByIdAndDelete(diaryId);
             return response(res, "Diary Deleted", true);
         }
     } catch (error) {

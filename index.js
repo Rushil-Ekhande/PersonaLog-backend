@@ -1,30 +1,29 @@
 import "./config.js"
 // import 'dotenv/config' 
 import express from "express";
-import mongoose from "mongoose";
+import dbConnect from "./Helpers/DatabaseConnector.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-mongoose.connect(process.env.MONGODB_ATLAS_CONNECTION_STRING)
-
+dbConnect()
     .then(() => {
-        console.log("Mongodb Atlas connected");
         app.listen(PORT, () => {
-            console.log("App is listening on port", PORT);
+            console.log("server is running on port", PORT);
         })
     })
-    .catch((error) => {
-        console.log(error);
-    });
+
+
 
 // importing all the routes
 import diaryRoutes from "./Routes/dairyRoutes.js";
+import pageRoutes from "./Routes/pageRoutes.js"
 
 app.use('/diary', diaryRoutes);
+app.use('/page', pageRoutes);
 
-app.listen(PORT, () => {
-    console.log("App runnning on port", PORT)
-})
+// app.listen(PORT, () => {
+//     console.log("App runnning on port", PORT)
+// })
