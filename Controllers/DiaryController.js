@@ -16,6 +16,7 @@ async function userIdChecker(userId) {
 
 export async function createDiary(req, res) {
     try {
+        const userId = req.user;
         const { name, giveAccessTo, visibility } = req.body;
         if (!name || !visibility) {
             return response(res, "Name and Visibility mode are required", false);
@@ -32,12 +33,19 @@ export async function createDiary(req, res) {
         const newDiary = new Diary(data);
         await newDiary.save();
 
+        await User.findByIdAndUpdate(
+            userId, {$push: {dairies: newDiary._id}}
+        )
+
         if (giveAccessTo) {
             const doesGiveAccessToUserExists = giveAccessTo.filter(userId => userIdChecker(userId));
             await Diary.findByIdAndUpdate(
                 Diary._id,
                 { $push: { giveAccessTo: { $each: doesGiveAccessToUserExists } } }
             );
+            await User.findByIdAndUpdate(
+                
+                {accessTo});
         }
 
         return response(res, "New Diary Added", true, newDiary._id);

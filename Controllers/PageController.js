@@ -1,14 +1,15 @@
 import response from "../Helpers/ResponseBoilerPlateHelper.js";
+import Diary from "../Models/DairyModel.js";
 import Page from "../Models/PageModel.js";
 
-export async function createPage(req, res){
+export async function createPage(req, res) {
     try {
-        const {title, description} = req.body;
-        if(!title) {
+        const { title, description } = req.body;
+        if (!title) {
             return response(res, "Title must be provided", false);
         };
 
-        if(!description) {
+        if (!description) {
             return response(res, "Description must be provided", false);
         };
 
@@ -27,32 +28,38 @@ export async function createPage(req, res){
     }
 }
 
-export async function updatePage(req, res){
+export async function updatePage(req, res) {
     try {
-        const {title, description, pageId} = req.body;
-        if(!pageId) {
+        const { title, description, pageId, diaryId } = req.body;
+        if (!pageId) {
             return response(res, "Unable to find the page", false);
+        } else {
+            if (title) {
+                await Page.findByIdAndUpdate(pageId, {
+                    title: title
+                });
+            }
+            if (description) {
+                await Page.findByIdAndUpdate(pageId, {
+                    description: description
+                });
+            }
+            if (diaryId) {
+                await Diary.findByIdAndUpdate(diaryId, {
+                    $push: { pages: pageId }
+                })
+            }
+            return response(res, "Diary Updated", true);
         }
-        if(title){
-            await Page.findByIdAndUpdate(pageId, {
-                title: title
-            })
-        }
-        if(description){
-            await Page.findByIdAndUpdate(pageId, {
-                description: description
-            })
-        }
-        return response(res, "Diary Updated", true);
     } catch (error) {
         return response(res, "Api Error for updating new Page", false);
     }
 }
 
-export async function deletePage(req, res){
+export async function deletePage(req, res) {
     try {
-        const {pageId} = req.body;
-        if(!pageId) {
+        const { pageId } = req.body;
+        if (!pageId) {
             return response(res, "Unable to find the page", false);
         }
         await Page.findByIdAndDelete(pageId);

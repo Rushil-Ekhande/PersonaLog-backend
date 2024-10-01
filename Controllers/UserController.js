@@ -1,0 +1,76 @@
+import response from "../Helpers/ResponseBoilerPlateHelper.js";
+import User from "../Models/UserModel.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+export async function register(req, res) {
+    try {
+        const { username, email, password } = req.body;
+
+        if (!username || !email || !password) {
+            return response(res, "All fields are required", false);
+        }
+        else {
+            const usernameExists = await User.findOne({ username });
+            const emailExists = await User.findOne({ email });
+            if (usernameExists || emailExists) {
+                return response(res, "Username or Email Already Exists", false);
+            } else {
+                const salt = await bcrypt.genSalt(10); 
+                const hashedPassword = await bcrypt.hash(password, salt);
+                const data = {
+                    username,
+                    email,
+                    password: hashedPassword
+                };
+                const newUser = new User(data);
+                await newUser.save();
+                return response(res, "New User Account Created", true, newUser._id);
+            }
+        }
+    } catch (error) {
+        return response(res, "Unable to register a new user account", false);
+    }
+}
+
+export async function login(req, res) {
+    try {
+        const { username, password} = req.body;
+        if (!username || !email) {
+            return response(res, "All fields are required", false);
+        }
+        else {
+            const user = await User.findOne({username});
+            if(!user){
+                return response(res, "Unable to find user", false);
+            }
+            else{
+                const isMatch = await bcrypt.compare(password, user.password);
+                if(!isMatch){
+                    return response(res, "Incorrect Password", false);
+                }else{
+                    const userData = {
+                        id: user._id,
+                    }
+                    jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        return response(res, "User Logged in", true, token);
+                    });
+                }
+            }
+        }
+    } catch (error) {
+        return response(res, "Unable to login to user account", false);
+    }
+}
+
+
+export async function updateUser(req, res) {
+     try {
+        const {username, password, people, dairies} = req.body;
+     } catch (error) {
+        return response(res, "Unable to login to user account", false);        
+     }
+}
