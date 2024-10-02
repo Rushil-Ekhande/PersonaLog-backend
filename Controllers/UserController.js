@@ -50,7 +50,7 @@ export async function login(req, res) {
                     return response(res, "Incorrect Password", false);
                 }else{
                     const userData = {
-                        id: user._id,
+                        _id: user._id,
                     }
                     jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
                         if (err) {
@@ -69,7 +69,21 @@ export async function login(req, res) {
 
 export async function updateUser(req, res) {
      try {
+        const user = req.user;
         const {username, password, people, dairies} = req.body;
+        if(username){
+            await User.findByIdAndUpdate(
+                user._id,
+                {username: username}
+            )
+        }
+        if(password){
+            await User.findByIdAndUpdate(
+                user._id,
+                {password: password}
+            )
+        }
+
      } catch (error) {
         return response(res, "Unable to login to user account", false);        
      }

@@ -4,6 +4,6 @@ const router = Router();
 
 router.post('/create-new-page', createPage);
 router.put('/update-page', updatePage);
-router.delete('/delete-page', deletePage);
+router.delete('/delete-page/:pageId', deletePage);
 
 export default router;

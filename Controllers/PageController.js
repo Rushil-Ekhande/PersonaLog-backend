@@ -58,13 +58,12 @@ export async function updatePage(req, res) {
 
 export async function deletePage(req, res) {
     try {
-        const { pageId } = req.body;
-        if (!pageId) {
+        const deletePage = await Page.findByIdAndDelete(req.params.pageId);
+        if(deletePage){
+            return response(res, "Deleted Page", true);
+        }else{
             return response(res, "Unable to find the page", false);
         }
-        await Page.findByIdAndDelete(pageId);
-        return response(res, "Deleted Page", true);
-
     } catch (error) {
         return response(res, "Api Error for deleting Page", false);
     }

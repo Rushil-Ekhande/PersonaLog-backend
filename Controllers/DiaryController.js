@@ -1,18 +1,9 @@
 import response from "../Helpers/ResponseBoilerPlateHelper.js";
 import Diary from "../Models/DairyModel.js";
-import Page from "../Models/PageModel.js";
 import User from "../Models/UserModel.js";
+import { userIdChecker, pageIdChecker } from "../Helpers/MongoDocumentChecker.js"
 
 // functions for diary creation
-
-async function userIdChecker(userId) {
-    const userExists = await User.findById(userId);
-    if (userExists) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 export async function createDiary(req, res) {
     try {
@@ -27,14 +18,14 @@ export async function createDiary(req, res) {
         }
         const ifTheDiaryAlreadyExists = await Diary.findOne({ name: name });
 
-        if(ifTheDiaryAlreadyExists){
+        if (ifTheDiaryAlreadyExists) {
             return response(res, "Name already exists ", false);
         }
         const newDiary = new Diary(data);
         await newDiary.save();
 
         await User.findByIdAndUpdate(
-            userId, {$push: {dairies: newDiary._id}}
+            userId, { $push: { dairies: newDiary._id } }
         )
 
         if (giveAccessTo) {
@@ -44,8 +35,8 @@ export async function createDiary(req, res) {
                 { $push: { giveAccessTo: { $each: doesGiveAccessToUserExists } } }
             );
             await User.findByIdAndUpdate(
-                
-                {accessTo});
+
+                { accessTo });
         }
 
         return response(res, "New Diary Added", true, newDiary._id);
@@ -56,15 +47,6 @@ export async function createDiary(req, res) {
 }
 
 // function for updating diary
-
-async function pageIdChecker(pageId) {
-    const pageExists = await Page.findById(pageId);
-    if (pageExists) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 export async function updateDiary(req, res) {
     try {
@@ -116,14 +98,13 @@ export async function updateDiary(req, res) {
 
 // Function for deleting diary
 
-export async function deleteDiary(req, res){
+export async function deleteDiary(req, res) {
     try {
-        const {diaryId} = req.body;
-        if(!diaryId){
-            return response(res, "Unable to find the diary", false);
-        }else{
-            await Diary.findByIdAndDelete(diaryId);
+        const deleteDiary = await Diary.findByIdAndDelete(req.params.diaryId);
+        if(deleteDiary){
             return response(res, "Diary Deleted", true);
+        }else{
+            return response(res, "Unable to find the diary", false);
         }
     } catch (error) {
         return response(res, "Api Error for deleting Diary", false);

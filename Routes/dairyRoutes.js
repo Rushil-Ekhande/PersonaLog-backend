@@ -4,6 +4,6 @@ const router = Router();
 
 router.post('/create-new-diary', createDiary);
 router.put('/update-diary', updateDiary);
-router.delete('/delete-diary', deleteDiary);
+router.delete('/delete-diary/:diaryId', deleteDiary);
 
 export default router;
