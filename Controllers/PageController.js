@@ -30,7 +30,8 @@ export async function createPage(req, res) {
 
 export async function updatePage(req, res) {
     try {
-        const { title, description, pageId, diaryId } = req.body;
+        const { pageId } = req.params.pageId;
+        const { title, description, diaryId } = req.body;
         if (!pageId) {
             return response(res, "Unable to find the page", false);
         } else {

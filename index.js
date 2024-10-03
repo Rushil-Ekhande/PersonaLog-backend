@@ -20,7 +20,9 @@ dbConnect()
 import diaryRoutes from "./Routes/dairyRoutes.js";
 import pageRoutes from "./Routes/pageRoutes.js"
 import personRoute from "./Routes/personRoute.js"
+import userRoute from "./Routes/userRoute.js"
 
 app.use('/diary', diaryRoutes);
 app.use('/page', pageRoutes);
 app.use('/person', personRoute);
+app.use('/user', userRoute);

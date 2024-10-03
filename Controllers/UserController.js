@@ -1,3 +1,4 @@
+import { personIdChecker } from "../Helpers/MongoDocumentChecker.js";
 import response from "../Helpers/ResponseBoilerPlateHelper.js";
 import User from "../Models/UserModel.js";
 import bcrypt from "bcrypt";
@@ -16,7 +17,7 @@ export async function register(req, res) {
             if (usernameExists || emailExists) {
                 return response(res, "Username or Email Already Exists", false);
             } else {
-                const salt = await bcrypt.genSalt(10); 
+                const salt = await bcrypt.genSalt(10);
                 const hashedPassword = await bcrypt.hash(password, salt);
                 const data = {
                     username,
@@ -35,20 +36,20 @@ export async function register(req, res) {
 
 export async function login(req, res) {
     try {
-        const { username, password} = req.body;
+        const { username, password } = req.body;
         if (!username || !email) {
             return response(res, "All fields are required", false);
         }
         else {
-            const user = await User.findOne({username});
-            if(!user){
+            const user = await User.findOne({ username });
+            if (!user) {
                 return response(res, "Unable to find user", false);
             }
-            else{
+            else {
                 const isMatch = await bcrypt.compare(password, user.password);
-                if(!isMatch){
+                if (!isMatch) {
                     return response(res, "Incorrect Password", false);
-                }else{
+                } else {
                     const userData = {
                         _id: user._id,
                     }
@@ -68,23 +69,45 @@ export async function login(req, res) {
 
 
 export async function updateUser(req, res) {
-     try {
+    try {
         const user = req.user;
-        const {username, password, people, dairies} = req.body;
-        if(username){
-            await User.findByIdAndUpdate(
-                user._id,
-                {username: username}
-            )
-        }
-        if(password){
-            await User.findByIdAndUpdate(
-                user._id,
-                {password: password}
-            )
-        }
+        const { username, password, people, dairies } = req.body;
+        if (user) {
+            if (username) {
+                await User.findByIdAndUpdate(
+                    user._id,
+                    { username: username }
+                )
+            }
+            
+            if (password) {
+                await User.findByIdAndUpdate(
+                    user._id,
+                    { password: password }
+                )
+            }
 
-     } catch (error) {
-        return response(res, "Unable to login to user account", false);        
-     }
+            if (people) {
+                const doesPeopleIdExists = people.filter(personId => personIdChecker(personId));
+                await User.findByIdAndUpdate(
+                    user._id,
+                    { $push: { people: { $each: doesPeopleIdExists } } }
+                )
+            }
+
+            if (dairies) {
+                const doesdairiesIdExists = dairies.filter(diaryId => diaryIdChecker(diaryId));
+                await User.findByIdAndUpdate(
+                    user._id,
+                    { $push: { dairies: { $each: doesdairiesIdExists } } }
+                )
+            }
+
+            return response(res, "Updated User", true);
+        } else {
+            return response(res, "Unable to find user", false);
+        }
+    } catch (error) {
+        return response(res, "Unable to login to user account", false);
+    }
 }

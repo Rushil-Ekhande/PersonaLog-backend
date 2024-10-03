@@ -7,7 +7,7 @@ import { userIdChecker, pageIdChecker } from "../Helpers/MongoDocumentChecker.js
 
 export async function createDiary(req, res) {
     try {
-        const userId = req.user;
+        const user = req.user;
         const { name, giveAccessTo, visibility } = req.body;
         if (!name || !visibility) {
             return response(res, "Name and Visibility mode are required", false);
@@ -25,18 +25,18 @@ export async function createDiary(req, res) {
         await newDiary.save();
 
         await User.findByIdAndUpdate(
-            userId, { $push: { dairies: newDiary._id } }
+            user._id, { $push: { dairies: newDiary._id } }
         )
 
         if (giveAccessTo) {
             const doesGiveAccessToUserExists = giveAccessTo.filter(userId => userIdChecker(userId));
             await Diary.findByIdAndUpdate(
-                Diary._id,
+                newDiary._id,
                 { $push: { giveAccessTo: { $each: doesGiveAccessToUserExists } } }
             );
             await User.findByIdAndUpdate(
-
-                { accessTo });
+                user._id,
+                { $push: {accessTo: newDiary._id} });
         }
 
         return response(res, "New Diary Added", true, newDiary._id);
@@ -50,28 +50,32 @@ export async function createDiary(req, res) {
 
 export async function updateDiary(req, res) {
     try {
-        const { name, pages, giveAccessTo, visibility, diaryId } = req.body;
+        const {diaryId} = req.params.diaryId;
+        const { name, pages, giveAccessTo, visibility } = req.body;
+
         if (diaryId) {
             if (name) {
                 await Diary.findByIdAndUpdate(
-                    Diary._id,
+                    diaryId,
                     {
                         name: name
                     }
                 )
             }
+
             if (visibility) {
                 await Diary.findByIdAndUpdate(
-                    Diary._id,
+                    diaryId,
                     {
                         visibility: visibility
                     }
                 )
             }
+
             if (pages) {
                 const doesPagesExists = pages.filter(page => pageIdChecker(page));
                 await Diary.findByIdAndUpdate(
-                    Diary._id,
+                    diaryId,
                     { push: { pages: { $each: doesPagesExists } } }
                 )
             }
@@ -79,12 +83,10 @@ export async function updateDiary(req, res) {
             if (giveAccessTo) {
                 const doesGiveAccessToUserExists = giveAccessTo.filter(userId => userIdChecker(userId));
                 await Diary.findByIdAndUpdate(
-                    Diary._id,
+                    diaryId,
                     { $push: { giveAccessTo: { $each: doesGiveAccessToUserExists } } }
                 );
             }
-
-            await Diary.save();
 
             return response(res, "Diary Updated", true);
 
