@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export async function register(req, res) {
+    console.log("ser controller");
+    
     try {
         const { username, email, password } = req.body;
 
@@ -26,6 +28,8 @@ export async function register(req, res) {
                 };
                 const newUser = new User(data);
                 await newUser.save();
+                console.log("new yuser created");
+                
                 return response(res, "New User Account Created", true, newUser._id);
             }
         }
@@ -36,12 +40,12 @@ export async function register(req, res) {
 
 export async function login(req, res) {
     try {
-        const { username, password } = req.body;
-        if (!username || !email) {
+        const { email, password } = req.body;
+        if (!email || !password) {
             return response(res, "All fields are required", false);
         }
         else {
-            const user = await User.findOne({ username });
+            const user = await User.findOne({ email });
             if (!user) {
                 return response(res, "Unable to find user", false);
             }
@@ -57,7 +61,8 @@ export async function login(req, res) {
                         if (err) {
                             console.log(err);
                         }
-                        return response(res, "User Logged in", true, token);
+                        
+                        return response(res, "User Logged in", true, {token, user});
                     });
                 }
             }
