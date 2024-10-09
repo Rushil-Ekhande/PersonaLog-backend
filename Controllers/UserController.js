@@ -40,6 +40,8 @@ export async function register(req, res) {
 
 export async function login(req, res) {
     try {
+        console.log("Login appi");
+        
         const { email, password } = req.body;
         if (!email || !password) {
             return response(res, "All fields are required", false);
@@ -57,10 +59,12 @@ export async function login(req, res) {
                     const userData = {
                         _id: user._id,
                     }
+
                     jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
                         if (err) {
                             console.log(err);
                         }
+                        console.log({token, user});
                         
                         return response(res, "User Logged in", true, {token, user});
                     });
