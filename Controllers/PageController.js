@@ -48,7 +48,7 @@ export async function updatePage(req, res) {
             if (diaryId) {
                 await Diary.findByIdAndUpdate(diaryId, {
                     $push: { pages: pageId }
-                })
+                });
             }
             return response(res, "Diary Updated", true);
         }
