@@ -64,7 +64,6 @@ export async function login(req, res) {
                         if (err) {
                             console.log(err);
                         }
-                        console.log({token, user});
                         
                         return response(res, "User Logged in", true, {token, user});
                     });
