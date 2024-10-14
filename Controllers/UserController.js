@@ -5,8 +5,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export async function register(req, res) {
-    console.log("ser controller");
-    
     try {
         const { username, email, password } = req.body;
 
@@ -40,8 +38,6 @@ export async function register(req, res) {
 
 export async function login(req, res) {
     try {
-        console.log("Login appi");
-        
         const { email, password } = req.body;
         if (!email || !password) {
             return response(res, "All fields are required", false);
