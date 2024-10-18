@@ -69,3 +69,29 @@ export async function deletePage(req, res) {
         return response(res, "Api Error for deleting Page", false);
     }
 }
+
+export async function getPage(req, res){
+    try {
+        const page = await Page.findById(req.params.pageId);
+        if(!page){
+            return response(res, "Unable to find the page", false);
+        }else{
+            return response(res, "Page found", true, page);
+        }
+    } catch (error) {
+        return response(res, "Api Error for getting the Page", false);
+    }
+}
+
+export async function getAllPages(req, res){
+    try {
+        const page = await Page.find({});
+        if(!page){
+            return response(res, "Unable to find the page", false);
+        }else{
+            return response(res, "Page found", true, page);
+        }
+    } catch (error) {
+        return response(res, "Api Error for getting the Page", false);
+    }
+}
